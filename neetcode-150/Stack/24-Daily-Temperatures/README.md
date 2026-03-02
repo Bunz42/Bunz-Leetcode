@@ -1,4 +1,4 @@
-# 19 - Minimum Window Substring
+# 24 - Daily Temperatures
 
 **Difficulty:** Hard | **Link:** https://neetcode.io/problems/minimum-window-with-characters/question
 
