@@ -1,92 +1,67 @@
-# 19 - Minimum Window Substring
+# 23 - Evaluate Reverse Polish Notation
 
-**Difficulty:** Hard | **Link:** https://neetcode.io/problems/minimum-window-with-characters/question
+**Difficulty:** Medium | **Link:** https://neetcode.io/problems/evaluate-reverse-polish-notation/question
 
 ## 1. Problem Description
 ```text
-Given two strings s and t, return the shortest substring of s such that every character in t,
-including duplicates, is present in the substring. If such a substring does not exist, return an empty string "".
+You are given an array of strings tokens that represents a valid arithmetic expression in Reverse Polish Notation.
 
-You may assume that the correct output is always unique.
+Return the integer that represents the evaluation of the expression.
+
+The operands may be integers or the results of other operations.
+The operators include '+', '-', '*', and '/'.
+Assume that division between integers always truncates toward zero.
 ```
 
 **Example 1:**
 ```text
-Input: s = "OUZODYXAZV", t = "XYZ"
+Input: tokens = ["1","2","+","3","*","4","-"]
 
-Output: "YXAZ"
+Output: 5
 
-Explanation: "YXAZ" is the shortest substring that includes "X", "Y", and "Z" from string t.
-```
-
-**Example 2:**
-```text
-Input: s = "xyz", t = "xyz"
-
-Output: "xyz"
-```
-
-**Example 3:**
-```text
-Input: s = "x", t = "xy"
-
-Output: ""
+Explanation: ((1 + 2) * 3) - 4 = 5
 ```
 
 **Constraints:**
 ```text
-1 <= s.length <= 1000
-1 <= t.length <= 1000
-s and t consist of uppercase and lowercase English letters.
+1 <= tokens.length <= 1000.
+tokens[i] is "+", "-", "*", or "/", or a string representing an integer in the range [-100, 100].
 ```
 
 ## 2. My Approach
 ```text
-This is clearly a sliding window problem. The word "window" is literally in the problem name.
-Okay, but in actuality, this problem involves identifying substrings that satisfy a given
-condition which is perfect for the sliding window pattern.
+You can easily brute force this problem by just iterating through
+the array till you find an operator, then evaluating the expression
+with that operator and the two operands to the left of it. Then,
+you just have to modify the array so that the result of that
+operation is in the spot that the operator once was, and repeat
+the process till you get the final result. However, this is a
+pretty slow solution, with a time complexity of O(n^2).
 
-If you were to brute force this problem, you'd just check every possible substring possible
-and keep track of the shortest one that meets the condition. This algorithm would have
-a time complexity of O(n^2) which is pretty slow. Thus, we use sliding window to eliminate
-the rechecking of already unqualified substrings.
+Instead, another way to do this is using a stack. With a stack,
+you no longer need to run any complicated algorithm to "alter"
+the array accordingly after you evaluate an operation. What
+I mean by this, is that I can just rely on the way a stack functions
+to ensure that the result of the operation is always just going to be
+on the top of the stack, ready to be used in the next operation.
 
-This problem is pretty similar to some other sliding window problems I've done, like the
-one where you check whether or not any substring in a string is a permutation of another
-string. 
+To do this problem, all I need to do is iterate through the array and 
+push any numbers I see onto a stack. Then, if I ever encounter an operator,
+the previous two numbers pushed onto the stack are guaranteed to be the 
+operands for that operator, so I just pop them off the stack and evaluate
+the operation. Keep in mind that the operand that's popped first is actually
+the 2nd value in the operation, and the one popped 2nd is the 1st.
+Then, I take that result and I push it onto the stack as the next operand.
 
-The catch: this problem is different because the substring can have characters that t
-doesn't have, but can still be valid. The only characters you care about are the ones 
-that are in string t. Thus, when comparing the two frequency maps, only check the chars
-that appear in t.
-Also, characters are case sensitive.
-
-How do we validate the substrings and know when to shrink or expand it? We just
-keep expanding the window through the right pointer until we hit a valid substring
-that satisfies the condition. Then, we want the shortest possible one, so we shrink
-it from the left until we get the shortest substring that's still valid. Then, we 
-compare it to the previously found minimum-length substring.
-
-Edge cases: 
-1. If t is longer than s or an empty string, return an empty string immediately.
-
-Actual implementation (python):
-- If len(t) > len(s) return ""
-- Initialize freq_t, window for t char frequencies and substr char frequencies.
-- l = 0 for the left side of the window.
-- Initialize min_string = "" variable.
-- min_len = float('infinity')
-- make a helper function is_valid to check the validity of a substring:
-for char, count in freq_t.items(): 
-if window.get(char, 0) < count: return False
-else: return True
-- for r in range(len(s)) for the right side of the dynamic window.
-- char = s[r]
-- window[char] = window.get(s[r], 0) + 1
-- while is_valid:
-	- if the length of the valid substring < the min_len found so far,
-	make it our new min_string.
-	- pop left character
-- Extract the indices and return the resulting min_string.
+Python implementation:
+- make a list of operators
+- stack = [] to initialize the stack
+- loop through the array
+- if I see a number (something that's not in the list of operators), I just
+stack.append(number)
+- if I see an operator, stack.pop() twice, storing the values in variables.
+- evaluate the appropriate operation.
+- stack.append(result)
+- return the final value on the stack as final result of the entire expression.
 ```
 
