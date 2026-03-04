@@ -96,5 +96,8 @@ that locks the two arrays into alignment with each other by storing them in a li
 the sort function on the array, it'll only sort by the first element in the tuples, so it'll only sort by position,
 but the tuples will still exist and have the correct associated speeds
 
+Note: this solution has a time complexity of O(nlogn). The actual algorithm is O(n) but the problem is sorting
+bottlenecks the time complexity to O(nlogn) unfortunately.
+
 ```
 
