@@ -7,5 +7,4 @@ min() # Finds the min between two numbers
 len() # Finds the length of an iterable
 set() # Initializes a set in python
 Counter() # Counts hashable objects
-collections.deque() # Deque
 zip() # Links two lists by storing their elements in tuples
