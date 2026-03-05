@@ -1,13 +1,19 @@
 class Solution:
-    def carFleet(self, target: int, position: List[int], speed: List[int]) -> int:
-        cars = list(zip(position, speed))
-        cars.sort(reverse=True)
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        stack = []
+        max_area = 0
 
-        fleets = []
+        for i in range(len(heights)):
+            while stack and heights[stack[-1]] > heights[i]:
+                height = heights[stack.pop()]
+                width = i if not stack else i - stack[-1] - 1
+                max_area = max(max_area, height * width)
 
-        for p, s in cars:
-            time = (target - p)/s
-            if not fleets or time > fleets[-1]:
-                fleets.append(time)
+            stack.append(i)
 
-        return len(fleets)
+        for j in range(len(stack)):
+            height = heights[stack.pop()]
+            width = len(heights) if not stack else len(heights) - stack[-1] - 1
+            max_area = max(max_area, height * width)
+          
+        return max_area
