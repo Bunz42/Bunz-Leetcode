@@ -1,103 +1,104 @@
-# 25 - Car Fleets
+# 26 - Largest Rectangle in Histogram
 
-**Difficulty:** Medium | **Link:** https://neetcode.io/problems/car-fleet/question
+**Difficulty:** Hard | **Link:** https://neetcode.io/problems/largest-rectangle-in-histogram/question
 
 ## 1. Problem Description
 ```text
-There are n cars traveling to the same destination on a one-lane highway.
+You are given an array of integers heights where heights[i] represents the height of a bar. The width of each bar is 1.
 
-You are given two arrays of integers position and speed, both of length n.
+Return the area of the largest rectangle that can be formed among the bars.
 
-position[i] is the position of the ith car (in miles)
-speed[i] is the speed of the ith car (in miles per hour)
-The destination is at position target miles.
-
-A car can not pass another car ahead of it.
-It can only catch up to another car and then drive at the same speed as the car ahead of it.
-
-A car fleet is a non-empty set of cars driving at the same position and same speed.
-A single car is also considered a car fleet.
-
-If a car catches up to a car fleet the moment the fleet reaches the destination,
-then the car is considered to be part of the fleet.
-
-Return the number of different car fleets that will arrive at the destination.
+Note: This chart is known as a histogram.
 ```
 
 **Example 1:**
 ```text
-Input: target = 10, position = [1,4], speed = [3,2]
+Input: heights = [7,1,7,2,2,4]
 
-Output: 1
-Explanation: The cars starting at 1 (speed 3) and 4 (speed 2) become a fleet, meeting each other at 10, the destination.
+Output: 8
 ```
 
 **Example 2:**
 ```text
-Input: target = 10, position = [4,1,0,7], speed = [2,2,1,1]
+Input: heights = [1,3,7]
 
-Output: 3
-Explanation: The cars starting at 4 and 7 become a fleet at position 10.
-The cars starting at 1 and 0 never catch up to the car ahead of them.
-Thus, there are 3 car fleets that will arrive at the destination.
+Output: 7
+```
+
+**Constraints:**
+```text
+1 <= heights.length <= 1000.
+0 <= heights[i] <= 1000
 ```
 
 ## 2. My Approach
 ```text
-This problem is pretty tricky, because it's pretty hard to visualize the
-cars, and it's kind of hard to come up with an algorithm that determines
-whether or not two cars will form a fleet, because you need to consider both
-where they start and their speeds. Just because a car is faster than another
-car, doesn't mean they will necessarily form a fleet, because one car might
-already be near the end, so the faster car won't catch up in time.
+This problem is asking you to find the largest possible rectangular area
+that you can form with the bars in a histogram, which is a chart where
+all of its bars are touching the preceding and following bars.
 
-Let's start by going over what I know must be a condition for a car to form a 
-fleet with another car. I know for a fact that the only way is if the car behind
-another car is travelling at a faster speed. This indicates to me that we only
-care about the times when a car is BEHIND another car.
+To determine the area of a rectangle formed by the histogram, you can take
+the shortest bar within a grouping of bars, then extend it left and right
+until you hit an even shorter bar, then calculate the area using the width
+of the interval multiplied by the height of that extended bar. This works 
+because if you visualize how rectangular areas are formed in a histogram, 
+you will realize that they are bottlenecked by the shortest bar within a
+given interval.
 
-With this fact in mind, I want to find a way to simplify the problem a bit so that
-I have something to work with. I was thinking of sorting the positions in ascending order,
-to make every car start behind another car, then doing something with their speeds, but
-after thinking about it for a while, that doesn't really help with anything. This is
-because if I sort the cars in ascending order, it's still kind of hard to clarify what
-their final speeds at the target destination are going to be because the car you once
-thought would only form a fleet with the previous car might form a fleet with another car
-ahead of it, and everything just gets very messy.
+So basically, the problem is asking "if I force this bar to be the shortest
+part of my rectangle, how far can I stretch it to the left and right before
+it gets blocked by a shorter bar?"
 
-So, instead, now I'm thinking that maybe it's better to sort them in descending order, because
-this will actually tell me good information about the final speeds of each of the cars, since
-the car at the front is guaranteed to be travelling at its original speed, and then from there
-it seems like you can kind of manipulate the other car speeds around that fact.
+A brute force approach to this problem would be to iterate
+through every single bar, extending it left and right to find the area it
+creates, then updating a maximum area variable accordingly. However, this 
+approach is super slow with an O(n^2) time complexity.
 
-In order to actually find whether or not a car will form a fleet with the car ahead of it, I need
-to know the amount of time it would take for each car to reach the final target, regardless of its
-position. If I can find the time it would take for each car to get to the destination, I know that
-cars that take less time to reach the end than cars in front of them are guaranteed to form a fleet.
-To calculate the amount of time a car is going to take to reach the destination, I can just take the
-difference between the target and current position, then divide it by the speed.
+However, there's a better way to solve this problem by pre-calculating
+the boundaries that a bar can extend to, then finding the height from there.
+To do this, we need some way to find the 1st occurrence of a shorter bar
+to the left of the current bar, then the 1st occurrence of a shorter bar
+to the right of the current bar.
 
-But, now I need to actually keep track of the time taken by the fleets I find, because fleets might form 
-fleets with other cars in front of them, but cant form other fleets with cars behind them. A helpful
-data structure for maintaining this sort of "ordering" where elements can't get in front of other elements
-before they leave would be a stack. So, I can use a stack to track the times of each fleet.
+How can we find the boundaries? We can use a stack where we store indices instead of
+heights. Specifically, we need to use a monotonically increasing stack, and I'll
+explain why in a bit. Think of it like this: as we iterate through the histogram,
+we first care about finding the right boundary of a given bar, and since that only
+happens when we find the 1st shorter bar to the right of the current bar, we can just
+keep pushing the positions of taller/equal bars onto the stack, until we find the
+shorter one. 
 
-I can iterate through the array (which will be sorted in descending order) and calculate the time each
-car will take to reach the target, then if a car ever takes a lower or equal amount of time than the fleet
-at the top of the stack it just joins the fleet. Otherwise, it'll form a new fleet (because the problem says that
-a single car is also considered a fleet), and I can push its time onto the stack as a new fleet.
+Now, remember, as we store the positions of pillars, we want to immediately calculate
+a valid area whenever there is one. So, as soon as we find a shorter pillar, instead
+of pushing it into the stack, we pop the taller bar from the top of the stack
+and calculate its area using the height at that corresponding position, then we keep 
+doing that for all the bars in the stack until the short bar we just found isn't the
+shortest anymore. In that case, we can finally push the short bar onto the stack and
+keep going through the array.
 
-At the end, the size of the fleet stack is just going to be the number of fleets, so I can just return it.
-Problem solved!
+Okay, so we found the right boundary for each of the bars in the stack, but what
+about the left boundary? Well, the beauty of this problem is that since you're
+storing the bars in monotonically increasing order, it means that whenever
+you calculate an area for a bar, the bar to the left of it (right below it
+in the stack) is guaranteed to be shorter than the current bar, meaning it's always
+going to be the left boundary. So, with that in mind, you can calculate the area.
 
-Note: there's a problem because when I sort the position array in descending order, I also need to change the
-speed array so that they align properly. I actually didn't know this, but there's a function in Python ".zip()"
-that locks the two arrays into alignment with each other by storing them in a list of tuples. Then, when you call
-the sort function on the array, it'll only sort by the first element in the tuples, so it'll only sort by position,
-but the tuples will still exist and have the correct associated speeds
+Now, we have the appropriate algorithm to calculate the maximum areas that can be
+formed by each bar by storing their positions in the histogram in an increasing 
+order of height, so we just have to update a max variable every time we calculate
+a height, and then we'll get the right answer. This solution is O(n) because even
+though there's going to be a while loop in the solution, every element in the array
+is only pushed and popped once.
 
-Note: this solution has a time complexity of O(nlogn). The actual algorithm is O(n) but the problem is sorting
-bottlenecks the time complexity to O(nlogn) unfortunately.
+Note: in the case that the stack is empty, the interval width is just equal to the
+index of the right boundary. Otherwise, it's going to be i - top of stack - 1 after
+popping the desired bar to make the left boundary the new top of the stack.
+
+Note: I also need to account for the fact that if there are going to be some bars
+whose right boundary is just the end of the array, because they might just not have
+a shorter bar to their right. So, I just need to include a final loop at the end
+to flush out the areas of the remaining bars that weren't included in the stack
+algorithm.
 
 ```
 
