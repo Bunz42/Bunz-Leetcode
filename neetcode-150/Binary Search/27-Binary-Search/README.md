@@ -1,104 +1,85 @@
-# 26 - Largest Rectangle in Histogram
+# 27 - Binary Search
 
-**Difficulty:** Hard | **Link:** https://neetcode.io/problems/largest-rectangle-in-histogram/question
+**Difficulty:** Easy | **Link:** https://neetcode.io/problems/binary-search/question
 
 ## 1. Problem Description
 ```text
-You are given an array of integers heights where heights[i] represents the height of a bar. The width of each bar is 1.
+You are given an array of distinct integers nums, sorted in ascending order, and an integer target.
 
-Return the area of the largest rectangle that can be formed among the bars.
+Implement a function to search for target within nums. If it exists, then return its index, otherwise, return -1.
 
-Note: This chart is known as a histogram.
+Your solution must run in O(logn) time.
 ```
 
 **Example 1:**
 ```text
-Input: heights = [7,1,7,2,2,4]
+Input: nums = [-1,0,2,4,6,8], target = 4
 
-Output: 8
+Output: 3
 ```
 
 **Example 2:**
 ```text
-Input: heights = [1,3,7]
+Input: nums = [-1,0,2,4,6,8], target = 3
 
-Output: 7
+Output: -1
 ```
 
 **Constraints:**
 ```text
-1 <= heights.length <= 1000.
-0 <= heights[i] <= 1000
+1 <= nums.length <= 10000.
+-10000 < nums[i], target < 10000
+All the integers in nums are unique.
 ```
 
 ## 2. My Approach
 ```text
-This problem is asking you to find the largest possible rectangular area
-that you can form with the bars in a histogram, which is a chart where
-all of its bars are touching the preceding and following bars.
+This problem is literally just the basic implementation of the classic
+binary search algorithm.
 
-To determine the area of a rectangle formed by the histogram, you can take
-the shortest bar within a grouping of bars, then extend it left and right
-until you hit an even shorter bar, then calculate the area using the width
-of the interval multiplied by the height of that extended bar. This works 
-because if you visualize how rectangular areas are formed in a histogram, 
-you will realize that they are bottlenecked by the shortest bar within a
-given interval.
+Normally, searching through an array by just iterating through every element
+would have a time complexity of O(n), since each element in the array is checked
+once. However, with binary search, you can avoid checking some of the elements by
+breaking up the array into relevant halves on each iteration.
 
-So basically, the problem is asking "if I force this bar to be the shortest
-part of my rectangle, how far can I stretch it to the left and right before
-it gets blocked by a shorter bar?"
+Here's the idea:
 
-A brute force approach to this problem would be to iterate
-through every single bar, extending it left and right to find the area it
-creates, then updating a maximum area variable accordingly. However, this 
-approach is super slow with an O(n^2) time complexity.
+I'll start by checking the element in the middle of the array. This middle
+index can be calculated with the formula (low + high)/2, with low being the
+leftmost index in the array and high being the rightmost index.
 
-However, there's a better way to solve this problem by pre-calculating
-the boundaries that a bar can extend to, then finding the height from there.
-To do this, we need some way to find the 1st occurrence of a shorter bar
-to the left of the current bar, then the 1st occurrence of a shorter bar
-to the right of the current bar.
+If the middle element is just the target I'm searching for, then cool, I
+can just return it.
 
-How can we find the boundaries? We can use a stack where we store indices instead of
-heights. Specifically, we need to use a monotonically increasing stack, and I'll
-explain why in a bit. Think of it like this: as we iterate through the histogram,
-we first care about finding the right boundary of a given bar, and since that only
-happens when we find the 1st shorter bar to the right of the current bar, we can just
-keep pushing the positions of taller/equal bars onto the stack, until we find the
-shorter one. 
+If it's not, what condition can I use to efficiently reduce the number of 
+elements I need to check? Well, I know the array is sorted in ascending order,
+so let's say the element I just checked is greater than the target, well that
+means I know the target has to be in the left half of the array, and in the right
+half if the middle element was instead less than the target.
 
-Now, remember, as we store the positions of pillars, we want to immediately calculate
-a valid area whenever there is one. So, as soon as we find a shorter pillar, instead
-of pushing it into the stack, we pop the taller bar from the top of the stack
-and calculate its area using the height at that corresponding position, then we keep 
-doing that for all the bars in the stack until the short bar we just found isn't the
-shortest anymore. In that case, we can finally push the short bar onto the stack and
-keep going through the array.
+So, I can just completely ignore one half of the array if it's not relevant, meaning
+all I need to do is "shrink" the area I'm looking at into the desired subarray by
+moving my high or low accordingly.
 
-Okay, so we found the right boundary for each of the bars in the stack, but what
-about the left boundary? Well, the beauty of this problem is that since you're
-storing the bars in monotonically increasing order, it means that whenever
-you calculate an area for a bar, the bar to the left of it (right below it
-in the stack) is guaranteed to be shorter than the current bar, meaning it's always
-going to be the left boundary. So, with that in mind, you can calculate the area.
+Then, I just repeat the process until I either find the element I'm looking for, or 
+in the worst case scenario I get to a point where I shrink the area I'm observing
+into a subarray of length one, which at that point will be guaranteed to be the target
+I'm searching for, or will indicate to me that the target isn't present in the array.
 
-Now, we have the appropriate algorithm to calculate the maximum areas that can be
-formed by each bar by storing their positions in the histogram in an increasing 
-order of height, so we just have to update a max variable every time we calculate
-a height, and then we'll get the right answer. This solution is O(n) because even
-though there's going to be a while loop in the solution, every element in the array
-is only pushed and popped once.
+This searching algorithm has a time complexity of O(logn) because you're taking
+at most logn partitions of the array.
 
-Note: in the case that the stack is empty, the interval width is just equal to the
-index of the right boundary. Otherwise, it's going to be i - top of stack - 1 after
-popping the desired bar to make the left boundary the new top of the stack.
-
-Note: I also need to account for the fact that if there are going to be some bars
-whose right boundary is just the end of the array, because they might just not have
-a shorter bar to their right. So, I just need to include a final loop at the end
-to flush out the areas of the remaining bars that weren't included in the stack
-algorithm.
-
+Here's how I'll implement it in python:
+- Initialize two variables l and r to track the low and high indices that will bind the
+subarray I'm observing. Start l at the 1st index and r at the last index.
+- Then, while low <= high, I'll find the midpoint, compare it to the target.
+- Midpoint will be calculated with (l + r) // 2
+- If midpoint < target, I'll move l to midpoint + 1
+- If midpoint > target, I'll move r to midpoint - 1
+- Keep doing this until you find the target or you get to the point where low > high (which
+means the leftmost and rightmost indices are going to be right on top of each other,
+making the subarray size 1)
+- If the target isn't found before this condition is met, then that just means it was never
+in the sorted array to begin with, so I'll just return -1 outside the loop.
 ```
 
