@@ -42,6 +42,16 @@ The cars starting at 1 and 0 never catch up to the car ahead of them.
 Thus, there are 3 car fleets that will arrive at the destination.
 ```
 
+**Constraints:**
+```text
+n == position.length == speed.length.
+1 <= n <= 1000
+0 < target <= 1000
+0 < speed[i] <= 100
+0 <= position[i] < target
+All the values of position are unique.
+```
+
 ## 2. My Approach
 ```text
 This problem is pretty tricky, because it's pretty hard to visualize the
