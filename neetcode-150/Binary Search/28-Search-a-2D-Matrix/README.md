@@ -1,85 +1,110 @@
-# 27 - Binary Search
+# 28 - Search a 2D Matrix
 
-**Difficulty:** Easy | **Link:** https://neetcode.io/problems/binary-search/question
+**Difficulty:** Medium | **Link:** https://neetcode.io/problems/search-2d-matrix/question
 
 ## 1. Problem Description
 ```text
-You are given an array of distinct integers nums, sorted in ascending order, and an integer target.
+You are given an m x n 2-D integer array matrix and an integer target.
 
-Implement a function to search for target within nums. If it exists, then return its index, otherwise, return -1.
+Each row in matrix is sorted in non-decreasing order.
+The first integer of every row is greater than the last integer of the previous row.
+Return true if target exists within matrix or false otherwise.
 
-Your solution must run in O(logn) time.
+Can you write a solution that runs in O(log(m * n)) time?
 ```
 
 **Example 1:**
-```text
-Input: nums = [-1,0,2,4,6,8], target = 4
 
-Output: 3
+<img width="406" height="301" alt="image" src="https://github.com/user-attachments/assets/f3ff5a60-a86f-4bb6-9ff8-7ea6d3e38675" />
+
+```text
+Input: matrix = [[1,2,4,8],[10,11,12,13],[14,20,30,40]], target = 10
+
+Output: true
 ```
 
 **Example 2:**
-```text
-Input: nums = [-1,0,2,4,6,8], target = 3
 
-Output: -1
+<img width="407" height="302" alt="image" src="https://github.com/user-attachments/assets/1d97fbe1-ed1d-4bf6-b295-cb3e687d1185" />
+
+```text
+Input: matrix = [[1,2,4,8],[10,11,12,13],[14,20,30,40]], target = 15
+
+Output: false
 ```
 
 **Constraints:**
 ```text
-1 <= nums.length <= 10000.
--10000 < nums[i], target < 10000
-All the integers in nums are unique.
+m == matrix.length
+n == matrix[i].length
+1 <= m, n <= 100
+-10000 <= matrix[i][j], target <= 10000
 ```
 
 ## 2. My Approach
 ```text
-This problem is literally just the basic implementation of the classic
-binary search algorithm.
+To brute force this problem, you can just do a linear search through the
+2D matrix to find the target element. However, this would require a nested
+loop, which would make the time complexity O(m*n), which is quite slow.
 
-Normally, searching through an array by just iterating through every element
-would have a time complexity of O(n), since each element in the array is checked
-once. However, with binary search, you can avoid checking some of the elements by
-breaking up the array into relevant halves on each iteration.
+Since the problem specifies that you should aim for a solution with a time
+complexity of O(log(m*n)), and that the array is sorted in ascending order
+along its rows, this is a pretty dead giveaway that you can
+instead implement some form of the binary search algorithm to find the 
+target element instead.
 
-Here's the idea:
+However, binary searching through a 2D matrix is not as trivial as searching
+through a linear data structure like an array, so how can I come up with
+a version of its implementation that allows me to search through this matrix?
 
-I'll start by checking the element in the middle of the array. This middle
-index can be calculated with the formula (low + high)/2, with low being the
-leftmost index in the array and high being the rightmost index.
+Well, let's think back to the most fundamental implementation of binary search:
+you evaluate the middle element, then based on that element's value, you shift
+the interval you're checking based on the logic that the target value must be
+within that interval. You then repeat this process, shrinking the interval
+you're checking until, in the worst case, you get an interval of size 1 where
+the element is either guaranteed to be the target value, or guaranteed to not
+exist in the data structure.
 
-If the middle element is just the target I'm searching for, then cool, I
-can just return it.
+So, how can we kind of adapt this for a 2D matrix? Well, we can think of the
+rows of the 2D matrix as intervals. Since the elements in each row are
+guaranteed to be greater than the elements of the preceding row (as specified
+in the problem) I can use the intervals created by these rows to make logical
+decisions pertaining to the location of the target value.
 
-If it's not, what condition can I use to efficiently reduce the number of 
-elements I need to check? Well, I know the array is sorted in ascending order,
-so let's say the element I just checked is greater than the target, well that
-means I know the target has to be in the left half of the array, and in the right
-half if the middle element was instead less than the target.
+How exactly would I go about doing this? Well, first I need to identify which
+row the element is actually going to fall into, and I can do that by running a
+binary search on the rows. This operation will take O(logm) time where m is
+the number of rows.
 
-So, I can just completely ignore one half of the array if it's not relevant, meaning
-all I need to do is "shrink" the area I'm looking at into the desired subarray by
-moving my high or low accordingly.
+Then, I need to actually find the element within the row, and at this point the 
+problem is just as trivial as the fundamental binary search, because a single row
+within a 2D matrix is just a linear array of data, so we can just run the normal
+binary search on the specified row. This will take O(logn) time where n is the
+number of columns/number of values in each row.
 
-Then, I just repeat the process until I either find the element I'm looking for, or 
-in the worst case scenario I get to a point where I shrink the area I'm observing
-into a subarray of length one, which at that point will be guaranteed to be the target
-I'm searching for, or will indicate to me that the target isn't present in the array.
+How do I implement the binary search row identification? I can start by realizing
+that I only care about the biggest and smallest elements of each row, which occur
+in the last and 1st columns respectively (as specified in the problem). With this in 
+mind, I know that if the target value is greater than the biggest value in a row, it
+has to be in one of the rows after. If it's smaller than the smallest value in a row,
+it has to be in one of the rows before. Otherwise, it's just in the row you're
+looking at currently.
 
-This searching algorithm has a time complexity of O(logn) because you're taking
-at most logn partitions of the array.
-
-Here's how I'll implement it in python:
-- Initialize two variables l and r to track the low and high indices that will bind the
-subarray I'm observing. Start l at the 1st index and r at the last index.
-- Then, while low <= high, I'll find the midpoint, compare it to the target.
-- Midpoint will be calculated with (l + r) // 2
-- If midpoint < target, I'll move l to midpoint + 1
-- If midpoint > target, I'll move r to midpoint - 1
-- Keep doing this until you find the target or you get to the point where low > high (which
-means the leftmost and rightmost indices are going to be right on top of each other,
-making the subarray size 1)
-- If the target isn't found before this condition is met, then that just means it was never
-in the sorted array to begin with, so I'll just return -1 outside the loop.
+Implementation in python:
+1. Initialize variables storing the number of rows and columns using len(matrix) and 
+len(matrix[0]) respectively.
+2. Initialize top/bottom row variables to 0 and rows - 1
+3. While top <= bot, find the middle row with (top + bot)//2
+4. Check if the target is less than the smallest value in the mid row (matrix[row][0]).
+If it is, shift the bottom row to the mid row - 1
+5. If not, check if the target is greater than the biggest value in the mid row (matrix[row][-1]).
+If it is, shift the top row to mid row + 1.
+6. If none of these are met, then the target is within the current row, so you can just break out
+of the loop.
+7. Once we exit the loop, check to see if top <= bot, if not then the target isn't in any of the
+rows, so we just return False immediately.
+8. Find the row the element is in again using (top + bot) // 2
+9. Initialize the left and right columns as 0 and columns - 1
+10. Run binary search on the row (see solution for more details)
 ```
 
