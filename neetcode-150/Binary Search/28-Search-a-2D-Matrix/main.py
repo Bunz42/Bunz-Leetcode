@@ -1,19 +1,30 @@
 class Solution:
-    def largestRectangleArea(self, heights: List[int]) -> int:
-        stack = []
-        max_area = 0
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        rows, cols = len(matrix), len(matrix[0])
+        top, bot = 0, rows - 1
 
-        for i in range(len(heights)):
-            while stack and heights[stack[-1]] > heights[i]:
-                height = heights[stack.pop()]
-                width = i if not stack else i - stack[-1] - 1
-                max_area = max(max_area, height * width)
-
-            stack.append(i)
-
-        for j in range(len(stack)):
-            height = heights[stack.pop()]
-            width = len(heights) if not stack else len(heights) - stack[-1] - 1
-            max_area = max(max_area, height * width)
-          
-        return max_area
+        while top <= bot:
+            curr_row = (top + bot) // 2
+            if target < matrix[curr_row][0]:
+                bot = curr_row - 1
+            elif target > matrix[curr_row][-1]:
+                top = curr_row + 1
+            else:
+                break
+        
+        if top > bot:
+            return False
+        
+        row = (top + bot) // 2
+        l, r = 0, cols - 1
+        
+        while l <= r:
+            mid = (l + r) // 2
+            if target < matrix[row][mid]:
+                r = mid - 1
+            elif target > matrix[row][mid]:
+                l = mid + 1
+            else:
+                return True
+        
+        return False
