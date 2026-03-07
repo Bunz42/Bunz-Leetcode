@@ -1,110 +1,109 @@
-# 28 - Search a 2D Matrix
+# 29 - Koko Eating Bananas
 
-**Difficulty:** Medium | **Link:** https://neetcode.io/problems/search-2d-matrix/question
+**Difficulty:** Medium | **Link:** https://neetcode.io/problems/eating-bananas/question
 
 ## 1. Problem Description
 ```text
-You are given an m x n 2-D integer array matrix and an integer target.
+You are given an integer array piles where piles[i] is the number of bananas in the ith pile.
+You are also given an integer h, which represents the number of hours you have to eat all the bananas.
 
-Each row in matrix is sorted in non-decreasing order.
-The first integer of every row is greater than the last integer of the previous row.
-Return true if target exists within matrix or false otherwise.
+You may decide your bananas-per-hour eating rate of k.
+Each hour, you may choose a pile of bananas and eats k bananas from that pile.
+If the pile has less than k bananas, you may finish eating the pile but you can
+not eat from another pile in the same hour.
 
-Can you write a solution that runs in O(log(m * n)) time?
+Return the minimum integer k such that you can eat all the bananas within h hours.
 ```
 
 **Example 1:**
-
-<img width="406" height="301" alt="image" src="https://github.com/user-attachments/assets/f3ff5a60-a86f-4bb6-9ff8-7ea6d3e38675" />
-
 ```text
-Input: matrix = [[1,2,4,8],[10,11,12,13],[14,20,30,40]], target = 10
+Input: piles = [1,4,3,2], h = 9
 
-Output: true
+Output: 2
+
+Explanation: With an eating rate of 2, you can eat the bananas in 6 hours. With an eating rate of 1,
+you would need 10 hours to eat all the bananas (which exceeds h=9), thus the minimum eating rate is 2.
 ```
 
 **Example 2:**
-
-<img width="407" height="302" alt="image" src="https://github.com/user-attachments/assets/1d97fbe1-ed1d-4bf6-b295-cb3e687d1185" />
-
 ```text
-Input: matrix = [[1,2,4,8],[10,11,12,13],[14,20,30,40]], target = 15
+Input: piles = [25,10,23,4], h = 4
 
-Output: false
+Output: 25
 ```
 
 **Constraints:**
 ```text
-m == matrix.length
-n == matrix[i].length
-1 <= m, n <= 100
--10000 <= matrix[i][j], target <= 10000
+1 <= piles.length <= 1,000
+piles.length <= h <= 1,000,000
+1 <= piles[i] <= 1,000,000,000
 ```
 
 ## 2. My Approach
 ```text
-To brute force this problem, you can just do a linear search through the
-2D matrix to find the target element. However, this would require a nested
-loop, which would make the time complexity O(m*n), which is quite slow.
+To start this problem, I need to understand that the time it takes
+to get through a singular pile with x bananas if I'm eating at a rate
+of k bananas an hour is just ceil(x/k). I need to round up because
+I'm not allowed to start on the next pile in the same hour I just
+finished a pile, which means the number of hours will be an integer.
 
-Since the problem specifies that you should aim for a solution with a time
-complexity of O(log(m*n)), and that the array is sorted in ascending order
-along its rows, this is a pretty dead giveaway that you can
-instead implement some form of the binary search algorithm to find the 
-target element instead.
+I then need to realize that the problem explicitly tells me in the 
+constraints that the number of hours h you get to eat all the bananas 
+is guaranteed to be greater than or equal to the number of piles.
 
-However, binary searching through a 2D matrix is not as trivial as searching
-through a linear data structure like an array, so how can I come up with
-a version of its implementation that allows me to search through this matrix?
+So, given that I can only eat k bananas in a given hour, I now know that
+there is a k value which guarantees that I can finish the bananas
+in time. This k value is just equal to the number of bananas in the
+biggest pile, since if I can finish that pile in an hour, it's
+pretty obvious that I can finish any other pile in an hour as well.
+Since the number of hours I get is going to be at least the number
+of piles, I know I can definitely finish all the piles at this rate.
 
-Well, let's think back to the most fundamental implementation of binary search:
-you evaluate the middle element, then based on that element's value, you shift
-the interval you're checking based on the logic that the target value must be
-within that interval. You then repeat this process, shrinking the interval
-you're checking until, in the worst case, you get an interval of size 1 where
-the element is either guaranteed to be the target value, or guaranteed to not
-exist in the data structure.
+This gives me the upper bound of my answer k, but there's also 
+smaller values of k that will allow me to finish the piles in
+the given time limit, because you can eat the piles in any order.
+This is why the problem is asking to find the minimum k value that
+still lets me finish all the bananas.
 
-So, how can we kind of adapt this for a 2D matrix? Well, we can think of the
-rows of the 2D matrix as intervals. Since the elements in each row are
-guaranteed to be greater than the elements of the preceding row (as specified
-in the problem) I can use the intervals created by these rows to make logical
-decisions pertaining to the location of the target value.
+How do I do this?
+Well, I could choose to brute force this problem by just iterating
+through k values from 1 to whatever the upper bound is, then checking
+whether or not each one is valid, and tracking the minimum valid
+k value. 
 
-How exactly would I go about doing this? Well, first I need to identify which
-row the element is actually going to fall into, and I can do that by running a
-binary search on the rows. This operation will take O(logm) time where m is
-the number of rows.
+How do I check if a specified k value can work though?
+Well, you just go through each pile, find the time it takes to get
+through that pile by using ceil(pile/k), then add that to a sum. Then,
+you check if that total time is less than or equal to h to see if it's
+valid or not.
 
-Then, I need to actually find the element within the row, and at this point the 
-problem is just as trivial as the fundamental binary search, because a single row
-within a 2D matrix is just a linear array of data, so we can just run the normal
-binary search on the specified row. This will take O(logn) time where n is the
-number of columns/number of values in each row.
+However, this is going to be super slow, because I need to loop through
+every one of the n piles for every k value, making the time complexity O(m * n),
+with m being the number of k values (which is just equal to the upper bound)
 
-How do I implement the binary search row identification? I can start by realizing
-that I only care about the biggest and smallest elements of each row, which occur
-in the last and 1st columns respectively (as specified in the problem). With this in 
-mind, I know that if the target value is greater than the biggest value in a row, it
-has to be in one of the rows after. If it's smaller than the smallest value in a row,
-it has to be in one of the rows before. Otherwise, it's just in the row you're
-looking at currently.
+How can I reduce the time complexity of this operation?
+I realized that I'm pretty much just performing a linear search through a
+set of possible k values and looking for the minimum one that works. However,
+since the possible k values go from 1 to the upper bound in increasing order,
+I can just treat it like an array of values sorted in ascending order.
 
-Implementation in python:
-1. Initialize variables storing the number of rows and columns using len(matrix) and 
-len(matrix[0]) respectively.
-2. Initialize top/bottom row variables to 0 and rows - 1
-3. While top <= bot, find the middle row with (top + bot)//2
-4. Check if the target is less than the smallest value in the mid row (matrix[row][0]).
-If it is, shift the bottom row to the mid row - 1
-5. If not, check if the target is greater than the biggest value in the mid row (matrix[row][-1]).
-If it is, shift the top row to mid row + 1.
-6. If none of these are met, then the target is within the current row, so you can just break out
-of the loop.
-7. Once we exit the loop, check to see if top <= bot, if not then the target isn't in any of the
-rows, so we just return False immediately.
-8. Find the row the element is in again using (top + bot) // 2
-9. Initialize the left and right columns as 0 and columns - 1
-10. Run binary search on the row (see solution for more details)
+What algorithm can I use to search through a sorted array faster than I can
+with linear search? The answer is binary search. I can write a binary search
+algorithm to find the perfect k value.
+
+I'm going to adapt the classic binary search implementation by finding the
+middle k value, iterating through all the piles to calculate the total time
+it would take to eat all the bananas, then checking if its lower than h. If
+it is, cool I found a possible k value, so I can record it by updating a minimum 
+variable accordingly. Then, since we already found a possible k value, I know that we
+can just cut off the entire right half of the array since I only care about
+even slower rates that still allow me to finish all the bananas.
+
+In the other case, where the time for that middle k value exceeds h, I know
+now that it's invalid, and of course there's no possible way that any slower
+k values can allow me to eat all the bananas in time if a faster rate doesn't,
+so I can just cut off the left half of the array and try to find a k that works.
+
+I can just keep running this and return the minimum value at the end.
 ```
 
