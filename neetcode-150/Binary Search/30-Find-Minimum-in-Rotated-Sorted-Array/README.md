@@ -1,109 +1,99 @@
-# 29 - Koko Eating Bananas
+# 30 - Find Minimum in Rotated Sorted Array
 
-**Difficulty:** Medium | **Link:** https://neetcode.io/problems/eating-bananas/question
+**Difficulty:** Medium | **Link:** https://neetcode.io/problems/find-minimum-in-rotated-sorted-array/question
 
 ## 1. Problem Description
 ```text
-You are given an integer array piles where piles[i] is the number of bananas in the ith pile.
-You are also given an integer h, which represents the number of hours you have to eat all the bananas.
+You are given an array of length n which was originally sorted in ascending order.
+It has now been rotated between 1 and n times. For example, the array nums = [1,2,3,4,5,6] might become:
 
-You may decide your bananas-per-hour eating rate of k.
-Each hour, you may choose a pile of bananas and eats k bananas from that pile.
-If the pile has less than k bananas, you may finish eating the pile but you can
-not eat from another pile in the same hour.
+[3,4,5,6,1,2] if it was rotated 4 times.
+[1,2,3,4,5,6] if it was rotated 6 times.
 
-Return the minimum integer k such that you can eat all the bananas within h hours.
+Notice that rotating the array 4 times moves the last four elements of the array to the beginning.
+Rotating the array 6 times produces the original array.
+
+Assuming all elements in the rotated sorted array nums are unique, return the minimum element of this array.
+
+A solution that runs in O(n) time is trivial, can you write an algorithm that runs in O(log n) time?
 ```
 
 **Example 1:**
 ```text
-Input: piles = [1,4,3,2], h = 9
+Input: nums = [3,4,5,6,1,2]
 
-Output: 2
-
-Explanation: With an eating rate of 2, you can eat the bananas in 6 hours. With an eating rate of 1,
-you would need 10 hours to eat all the bananas (which exceeds h=9), thus the minimum eating rate is 2.
+Output: 1
 ```
 
 **Example 2:**
 ```text
-Input: piles = [25,10,23,4], h = 4
+Input: nums = [4,5,0,1,2,3]
 
-Output: 25
+Output: 0
+```
+
+**Example 3:**
+```text
+Input: nums = [4,5,6,7]
+
+Output: 4
 ```
 
 **Constraints:**
 ```text
-1 <= piles.length <= 1,000
-piles.length <= h <= 1,000,000
-1 <= piles[i] <= 1,000,000,000
+1 <= nums.length <= 1000
+-1000 <= nums[i] <= 1000
 ```
 
 ## 2. My Approach
 ```text
-To start this problem, I need to understand that the time it takes
-to get through a singular pile with x bananas if I'm eating at a rate
-of k bananas an hour is just ceil(x/k). I need to round up because
-I'm not allowed to start on the next pile in the same hour I just
-finished a pile, which means the number of hours will be an integer.
+Brute forcing this problem is super easy you just go through the array
+and find the minimum element. However, this problem says you should
+think of a better time complexity algorithm than O(n).
 
-I then need to realize that the problem explicitly tells me in the 
-constraints that the number of hours h you get to eat all the bananas 
-is guaranteed to be greater than or equal to the number of piles.
+The problem says I should be aiming for an algorithm that runs in O(logn)
+time, which immediately hints to me that I should use binary search.
 
-So, given that I can only eat k bananas in a given hour, I now know that
-there is a k value which guarantees that I can finish the bananas
-in time. This k value is just equal to the number of bananas in the
-biggest pile, since if I can finish that pile in an hour, it's
-pretty obvious that I can finish any other pile in an hour as well.
-Since the number of hours I get is going to be at least the number
-of piles, I know I can definitely finish all the piles at this rate.
+But how can I use binary search? The array given isn't sorted, because it's
+a rotated sorted array, and I can't just sort the array because that would
+bottleneck the time complexity to O(nlogn), which is even slower than the
+regular linear search.
 
-This gives me the upper bound of my answer k, but there's also 
-smaller values of k that will allow me to finish the piles in
-the given time limit, because you can eat the piles in any order.
-This is why the problem is asking to find the minimum k value that
-still lets me finish all the bananas.
+So, how can I implement binary search in this case? Well, let's start by
+defining how the whole rotation mechanic even works. The array being "rotated"
+a specified number of times just means its elements have been shifted to the
+right that many times, with overflowing elements cycling back to the beginning
+of the array.
 
-How do I do this?
-Well, I could choose to brute force this problem by just iterating
-through k values from 1 to whatever the upper bound is, then checking
-whether or not each one is valid, and tracking the minimum valid
-k value. 
+So, since the elements at the end of the sorted array are going to move
+to the front 1 by 1, you're pretty much guaranteed that if there's a break
+where the array isn't sorted anymore, you're going to end up with two distinct
+sorted parts of the array.
 
-How do I check if a specified k value can work though?
-Well, you just go through each pile, find the time it takes to get
-through that pile by using ceil(pile/k), then add that to a sum. Then,
-you check if that total time is less than or equal to h to see if it's
-valid or not.
+For example, if you have the original sorted array [1, 2, 3, 4, 5] and you rotate
+it twice, you'll get [4, 5, 1, 2, 3] which gives you the sorted partitions
+[4, 5] and [1, 2, 3].
 
-However, this is going to be super slow, because I need to loop through
-every one of the n piles for every k value, making the time complexity O(m * n),
-with m being the number of k values (which is just equal to the upper bound)
+I can run binary search on the array with two pointers, each in two different
+sorted segments. Then, I just find the middle between them, and two of the
+three between l, r, and mid are guaranteed to be in the same sorted segment. 
+Now, I just need to think of the condition I care about to eliminate one half 
+of the search and observe the other half.
 
-How can I reduce the time complexity of this operation?
-I realized that I'm pretty much just performing a linear search through a
-set of possible k values and looking for the minimum one that works. However,
-since the possible k values go from 1 to the upper bound in increasing order,
-I can just treat it like an array of values sorted in ascending order.
+Let's think about this:
+- If the middle pointer value is greater than the right pointer value, then that means
+middle pointer is in the left sorted segment. Since the left segment is going to have
+the bigger values in this case, the minimum value has to be to the right somewhere.
 
-What algorithm can I use to search through a sorted array faster than I can
-with linear search? The answer is binary search. I can write a binary search
-algorithm to find the perfect k value.
+- Otherwise, that just means we're in the correct segment where the minimum is located, so
+the minimum element has to be somewhere to the left or just straight up the mid element.
 
-I'm going to adapt the classic binary search implementation by finding the
-middle k value, iterating through all the piles to calculate the total time
-it would take to eat all the bananas, then checking if its lower than h. If
-it is, cool I found a possible k value, so I can record it by updating a minimum 
-variable accordingly. Then, since we already found a possible k value, I know that we
-can just cut off the entire right half of the array since I only care about
-even slower rates that still allow me to finish all the bananas.
+So, I just move the l and r pointers accordingly, but unlike the normal binary search,
+we don't have a specified target value, so we actually can't move r to mid - 1, because 
+we need to include the mid element just in case it is the minimum.
 
-In the other case, where the time for that middle k value exceeds h, I know
-now that it's invalid, and of course there's no possible way that any slower
-k values can allow me to eat all the bananas in time if a faster rate doesn't,
-so I can just cut off the left half of the array and try to find a k that works.
-
-I can just keep running this and return the minimum value at the end.
+We just repeat this process and then eventually, our l and r pointers are going to land
+on the same element, and that will be our minimum. Binary search brings our algorithm
+from O(n) to O(logn).
 ```
 
