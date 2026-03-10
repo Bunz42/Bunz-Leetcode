@@ -1,6 +1,6 @@
-# 30 - Find Minimum in Rotated Sorted Array
+# 31 - Search in Rotated Sorted Array
 
-**Difficulty:** Medium | **Link:** https://neetcode.io/problems/find-minimum-in-rotated-sorted-array/question
+**Difficulty:** Medium | **Link:** https://neetcode.io/problems/find-target-in-rotated-sorted-array/question
 
 ## 1. Problem Description
 ```text
@@ -9,91 +9,83 @@ It has now been rotated between 1 and n times. For example, the array nums = [1,
 
 [3,4,5,6,1,2] if it was rotated 4 times.
 [1,2,3,4,5,6] if it was rotated 6 times.
+Given the rotated sorted array nums and an integer target, return the index of target within nums, or -1 if it is not present.
 
-Notice that rotating the array 4 times moves the last four elements of the array to the beginning.
-Rotating the array 6 times produces the original array.
-
-Assuming all elements in the rotated sorted array nums are unique, return the minimum element of this array.
+You may assume all elements in the sorted rotated array nums are unique,
 
 A solution that runs in O(n) time is trivial, can you write an algorithm that runs in O(log n) time?
 ```
 
 **Example 1:**
 ```text
-Input: nums = [3,4,5,6,1,2]
+Input: nums = [3,4,5,6,1,2], target = 1
 
-Output: 1
+Output: 4
 ```
 
 **Example 2:**
 ```text
-Input: nums = [4,5,0,1,2,3]
+Input: nums = [3,5,6,0,1,2], target = 4
 
-Output: 0
-```
-
-**Example 3:**
-```text
-Input: nums = [4,5,6,7]
-
-Output: 4
+Output: -1
 ```
 
 **Constraints:**
 ```text
 1 <= nums.length <= 1000
 -1000 <= nums[i] <= 1000
+-1000 <= target <= 1000
+All values of nums are unique.
+nums is an ascending array that is possibly rotated.
 ```
 
 ## 2. My Approach
 ```text
-Brute forcing this problem is super easy you just go through the array
-and find the minimum element. However, this problem says you should
-think of a better time complexity algorithm than O(n).
+This problem is quite similar to the one I did yesterday, which was called
+Find Minimum in Rotated Sorted Array.
 
-The problem says I should be aiming for an algorithm that runs in O(logn)
-time, which immediately hints to me that I should use binary search.
+The trick to that problem was realizing you can split a rotated sorted array
+into two sorted segments, then you can run binary search on the segments
+and throw away certain halves of the search based on which sorted segment
+your mid variable is located in.
 
-But how can I use binary search? The array given isn't sorted, because it's
-a rotated sorted array, and I can't just sort the array because that would
-bottleneck the time complexity to O(nlogn), which is even slower than the
-regular linear search.
+This problem is really similar. The only difference now, is that instead of
+finding the minimum element, you're searching for a target element.
 
-So, how can I implement binary search in this case? Well, let's start by
-defining how the whole rotation mechanic even works. The array being "rotated"
-a specified number of times just means its elements have been shifted to the
-right that many times, with overflowing elements cycling back to the beginning
-of the array.
+Let's start by looking at it through the same lens we did for the last problem.
+Break the array into two sorted segments, the left and right. Then, define two
+pointers, each in distinct segments, and begin the binary search by finding
+the middle index.
 
-So, since the elements at the end of the sorted array are going to move
-to the front 1 by 1, you're pretty much guaranteed that if there's a break
-where the array isn't sorted anymore, you're going to end up with two distinct
-sorted parts of the array.
+If the middle value is already equal to the target, then great we can just
+return the index it's at because we found the target.
 
-For example, if you have the original sorted array [1, 2, 3, 4, 5] and you rotate
-it twice, you'll get [4, 5, 1, 2, 3] which gives you the sorted partitions
-[4, 5] and [1, 2, 3].
+However, if this isn't the case, we need to perform some more checks to find
+the target. Let's start by asking ourselves:
+"What happens if the target is in the left sorted segment?"
+How can we perform checks to verify that, and what can we do with that info?
 
-I can run binary search on the array with two pointers, each in two different
-sorted segments. Then, I just find the middle between them, and two of the
-three between l, r, and mid are guaranteed to be in the same sorted segment. 
-Now, I just need to think of the condition I care about to eliminate one half 
-of the search and observe the other half.
+Well, you know you're looking at the left segment if the value at your left
+pointer is lower than the one at your mid index, because imagine if the
+mid index was less than your left pointer. Since you rotated the array, the
+bigger values are going to overflow to the start of the array, so if you're
+mid index was less than your left pointer, it means you'd be looking at the
+smaller values in the right sorted segment.
 
-Let's think about this:
-- If the middle pointer value is greater than the right pointer value, then that means
-middle pointer is in the left sorted segment. Since the left segment is going to have
-the bigger values in this case, the minimum value has to be to the right somewhere.
+Now, if you're looking at the left sorted segment, how can we check if the
+target value is actually in this segment? We just compare to see if its in
+between the left pointer value and the middle value. If it is, it has to be
+in this segment so we drop the right. If not, it's going to be in the right 
+segment, so we drop the left.
 
-- Otherwise, that just means we're in the correct segment where the minimum is located, so
-the minimum element has to be somewhere to the left or just straight up the mid element.
+Similar logic applies to the right segment. If nums[l] is not less than or equal
+to nums[mid], then we know we're looking at the right sorted segment instead.
+So, now we just check if the target is between the middle and right values. If it
+is, then the target is in the right segment and we can drop the left. If not,
+the target is in the left segment and we drop the right.
 
-So, I just move the l and r pointers accordingly, but unlike the normal binary search,
-we don't have a specified target value, so we actually can't move r to mid - 1, because 
-we need to include the mid element just in case it is the minimum.
-
-We just repeat this process and then eventually, our l and r pointers are going to land
-on the same element, and that will be our minimum. Binary search brings our algorithm
-from O(n) to O(logn).
+We repeat this until the left and right pointers eventually land on top of the
+target, or become invalid (which therefore indicates the target isn't even there).
+We return -1 if the target was never found.
 ```
 
