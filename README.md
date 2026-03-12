@@ -1,3 +1,3 @@
 # Bunz-Leetcode
 Becoming a leetcode demon 😈  
-Comprehensive master guide for Sliding Window and Stack coming soon
+Comprehensive master guide for Sliding Window, Stack, and Binary Search coming soon
