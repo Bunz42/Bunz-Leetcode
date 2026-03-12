@@ -1,16 +1,17 @@
-# 33 - Median of Two Sorted Arrays
+# 45 - Invert Binary Tree
 
-**Difficulty:** Hard | **Link:** https://neetcode.io/problems/median-of-two-sorted-arrays/question
+**Difficulty:** Easy | **Link:** https://neetcode.io/problems/invert-a-binary-tree/question
 
 ## 1. Problem Description
 ```text
-You are given two integer arrays nums1 and nums2 of size m and n respectively, where each is sorted in ascending order.
-Return the median value among all elements of the two arrays.
-
-Your solution must run in O(log(m+n)) time.
+You are given the root of a binary tree. Invert the binary tree and return its root.
 ```
 
 **Example 1:**
+
+
+
+
 ```text
 Input: nums1 = [1,2], nums2 = [3]
 
