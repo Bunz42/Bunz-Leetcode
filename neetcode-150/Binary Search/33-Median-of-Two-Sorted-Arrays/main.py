@@ -1,31 +1,32 @@
-class TimeMap:
+class Solution:
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+        A, B = nums1, nums2
+        if len(B) < len(A):
+            A, B = B, A
 
-    def __init__(self):
-        self.time_map = collections.defaultdict(list)
+        total = len(A) + len(B)
+        half = total // 2
 
-    def set(self, key: str, value: str, timestamp: int) -> None:
-        self.time_map[key].append((value, timestamp))
-
-    def get(self, key: str, timestamp: int) -> str:
-        if key not in self.time_map:
-            return ""
-
-        values = self.time_map[key]
-
-        l, r = 0, len(values) - 1
-        res = ""
+        l = 0
+        r = len(A)
 
         while l <= r:
-            mid = (l + r) // 2
+            i = (l + r) // 2
+            j = half - i
 
-            mid_stamp = values[mid][1]
-            mid_value = values[mid][0]
+            A_left = A[i - 1] if i > 0 else float("-infinity")
+            A_right = A[i] if i < len(A) else float("infinity")
+            
+            B_left = B[j - 1] if j > 0 else float("-infinity")
+            B_right = B[j] if j < len(B) else float("infinity")
 
-            if mid_stamp <= timestamp:
-                res = mid_value
-                l = mid + 1
+            if A_left <= B_right and B_left <= A_right:
+                if total % 2 != 0:
+                    return min(A_right, B_right)
+                else:
+                    return ( max(A_left, B_left) + min(A_right, B_right) ) / 2
+            elif A_left > B_right:
+                r = i - 1
             else:
-                r = mid - 1
-        
-        return res
-
+                l = i + 1
+                
