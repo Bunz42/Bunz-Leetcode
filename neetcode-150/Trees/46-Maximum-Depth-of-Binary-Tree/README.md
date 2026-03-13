@@ -1,60 +1,55 @@
-# 45 - Invert Binary Tree
+# 46 - Maximum Depth of Binary Tree
 
-**Difficulty:** Easy | **Link:** https://neetcode.io/problems/invert-a-binary-tree/question
+**Difficulty:** Easy | **Link:** https://neetcode.io/problems/depth-of-binary-tree/question
 
 ## 1. Problem Description
 ```text
-You are given the root of a binary tree. Invert the binary tree and return its root.
+Given the root of a binary tree, return its depth.
+
+The depth of a binary tree is defined as the number of nodes along the longest path
+from the root node down to the farthest leaf node.
 ```
 
 **Example 1:**
 
-![Example 1](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/ac124ee6-207f-41f6-3aaa-dfb35815f200/public)
+<img width="283" height="454" alt="image" src="https://github.com/user-attachments/assets/551d076d-314c-4574-976f-e70167a6f600" />
 
 ```text
-Input: root = [1,2,3,4,5,6,7]
+Input: root = [1,2,3,null,null,4]
 
-Output: [1,3,2,7,6,5,4]
+Output: 3
 ```
 
 **Example 2:**
-
-![Example 2](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/e39e8d4f-9946-4f99-ee3d-0d4df08d4d00/public)
-
-```text
-Input: root = [3,2,1]
-
-Output: [3,1,2]
-```
-
-**Example 3:**
 ```text
 Input: root = []
 
-Output: []
+Output: 0
 ```
 
 **Constraints:**
 ```text
-0 <= The number of nodes in the tree <= 100
+0 <= The number of nodes in the tree <= 100.
 -100 <= Node.val <= 100
 ```
 
 ## 2. My Approach
 ```text
-This problem is just simple tree depth first search (dfs). It's not really
-typical dfs though because it's actually even simpler than normal dfs problems.
+This problem is obviously a simplified dfs problem. Dfs is perfect for finding routes along which
+you can traverse down the binary tree, so it's only natural that I dfs through the tree
+and calculate its maximum depth.
 
-The way to solve this problem is just to swap the child nodes of the root using
-root.left, root.right = root.right, root.left.
+But how do I do that? Well, let's consider this:
+I can start from the root, then recursively calculate the max depth of its two child nodes,
+because the maximum depth of a tree is just the max depth of its subtrees + 1 to account
+for its own root node.
 
-Then, you want to that for every subtree as well, so you just recursively call
-the inversion function on the child nodes root.left and root.right as well,
-returning the root of each inverted subtree until you finally backtrack to the
-original root and get a fully inverted binary tree.
+So, I just have to return 1 + max(leftDepth, rightDepth), because I want the biggest depth
+of the two subtrees on each recursive call. Then, the algorithm works its way down the tree
+recursively, treating each subtree as another binary tree with a root and other child nodes. 
 
-The base case for this problem is just when you get to a point in your tree where
-your root doesn't have any more child nodes to invert, so it's just when the next
-root you're checking doesn't exist (None).
+What's the base case though? The base case occurs when the root node you're looking at has
+no more child nodes, so it occurs once you get to a point where the root node is None, in
+which case you return 0.
 ```
 
