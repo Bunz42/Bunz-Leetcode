@@ -1,55 +1,86 @@
-# 46 - Maximum Depth of Binary Tree
+# 48 - Balanced Binary Tree
 
-**Difficulty:** Easy | **Link:** https://neetcode.io/problems/depth-of-binary-tree/question
+**Difficulty:** Easy | **Link:** https://neetcode.io/problems/balanced-binary-tree/question
 
 ## 1. Problem Description
 ```text
-Given the root of a binary tree, return its depth.
+Given a binary tree, return true if it is height-balanced and false otherwise.
 
-The depth of a binary tree is defined as the number of nodes along the longest path
-from the root node down to the farthest leaf node.
+A height-balanced binary tree is defined as a binary tree in which the left and right
+subtrees of every node differ in height by no more than 1.
 ```
 
 **Example 1:**
 
-<img width="283" height="454" alt="image" src="https://github.com/user-attachments/assets/551d076d-314c-4574-976f-e70167a6f600" />
+![Example 1](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/c19c3727-ea28-416c-3873-79ee75f2b400/public)
 
 ```text
 Input: root = [1,2,3,null,null,4]
 
-Output: 3
+Output: true
 ```
 
 **Example 2:**
+
+![Example 2](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/24fcc2da-e012-4f9e-856e-040f200f3c00/public)
+
+```text
+Input: root = [1,2,3,null,null,4,null,5]
+
+Output: false
+```
+
+**Example 3:**
 ```text
 Input: root = []
 
-Output: 0
+Output: true
 ```
 
 **Constraints:**
 ```text
-0 <= The number of nodes in the tree <= 100.
--100 <= Node.val <= 100
+The number of nodes in the tree is in the range [0, 1000].
+-1000 <= Node.val <= 1000
 ```
 
 ## 2. My Approach
 ```text
-This problem is obviously a simplified dfs problem. Dfs is perfect for finding routes along which
-you can traverse down the binary tree, so it's only natural that I dfs through the tree
-and calculate its maximum depth.
+Let's break this problem down. What am I actually trying to do?
+I'm trying to verify if a binary tree is height-balanced or not,
+which means that for every node, its two subtrees only differ
+in depth by no more than 1.
 
-But how do I do that? Well, let's consider this:
-I can start from the root, then recursively calculate the max depth of its two child nodes,
-because the maximum depth of a tree is just the max depth of its subtrees + 1 to account
-for its own root node.
+What does this mean? It means I need to first find a way to find
+the depth of both of the subtrees given a root node. I already 
+know how to do this recursively by just calling dfs on a root
+node's children and traversing through both paths with the base
+case being once I reach a node at the bottom that has non-existent
+child nodes. I just return one added to the recursive call to track
+how many nodes I visit.
 
-So, I just have to return 1 + max(leftDepth, rightDepth), because I want the biggest depth
-of the two subtrees on each recursive call. Then, the algorithm works its way down the tree
-recursively, treating each subtree as another binary tree with a root and other child nodes. 
+Here's the twist with this problem: I need to find a way to verify
+if the differences in depths of the two subtrees is no more than 1
+to see if the tree is height balanced. So, I need an extra flag to 
+check this. How about, if this condition is satisfied, I'll return
+the actual height of the subtree, but then return -1 if it's not balanced.
 
-What's the base case though? The base case occurs when the root node you're looking at has
-no more child nodes, so it occurs once you get to a point where the root node is None, in
-which case you return 0.
+Then, at the end, I can just return true or false based on if the final
+return value from the dfs is a valid height or -1, respectively.
+
+How do I actually implement this?
+1. I define a dfs function
+2. I define my base case (if not node: return 0)
+3. I run the dfs on the left and right nodes to 
+find the depths of those subtrees
+4. I write a check to see if I found any imbalances along
+the way down the tree. If so, I have to make sure I'm returning
+-1 all the time since I already know the tree is imbalanced.
+5. I write a check to see if the absolute value of the difference
+between the depths of the two subtrees is greater than 1. If it is,
+it's not balanced so I return -1.
+6. Otherwise, I return the actual height of the subtree.
+7. At the end, outside the dfs function, I call the dfs function on 
+the root node and check if it's value is -1 or not. If it is, I return
+false. If not, I return true.
 ```
 
