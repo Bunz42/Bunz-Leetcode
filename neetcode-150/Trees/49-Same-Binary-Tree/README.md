@@ -1,86 +1,79 @@
-# 48 - Balanced Binary Tree
+# 49 - Same Binary Tree
 
 **Difficulty:** Easy | **Link:** https://neetcode.io/problems/balanced-binary-tree/question
 
 ## 1. Problem Description
 ```text
-Given a binary tree, return true if it is height-balanced and false otherwise.
+Given the roots of two binary trees p and q, return true if the trees are equivalent, otherwise return false.
 
-A height-balanced binary tree is defined as a binary tree in which the left and right
-subtrees of every node differ in height by no more than 1.
+Two binary trees are considered equivalent if they share the exact same structure and the nodes have the same values.
 ```
 
 **Example 1:**
 
-![Example 1](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/c19c3727-ea28-416c-3873-79ee75f2b400/public)
+<img width="549" height="275" alt="image" src="https://github.com/user-attachments/assets/ac5ad370-4142-4ed4-a066-42296ad5129d" />
 
 ```text
-Input: root = [1,2,3,null,null,4]
+Input: p = [1,2,3], q = [1,2,3]
 
 Output: true
 ```
 
 **Example 2:**
 
-![Example 2](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/24fcc2da-e012-4f9e-856e-040f200f3c00/public)
+<img width="388" height="275" alt="image" src="https://github.com/user-attachments/assets/80784f19-227f-49b3-81cb-6aed6343f9ad" />
 
 ```text
-Input: root = [1,2,3,null,null,4,null,5]
+Input: p = [4,7], q = [4,null,7]
 
 Output: false
 ```
 
 **Example 3:**
-```text
-Input: root = []
 
-Output: true
+<img width="528" height="265" alt="image" src="https://github.com/user-attachments/assets/c4bb6065-0501-491f-b2ff-0a38a013d4e0" />
+
+```text
+Input: p = [1,2,3], q = [1,3,2]
+
+Output: false
 ```
 
 **Constraints:**
 ```text
-The number of nodes in the tree is in the range [0, 1000].
--1000 <= Node.val <= 1000
+0 <= The number of nodes in both trees <= 100.
+-100 <= Node.val <= 100
 ```
 
 ## 2. My Approach
 ```text
-Let's break this problem down. What am I actually trying to do?
-I'm trying to verify if a binary tree is height-balanced or not,
-which means that for every node, its two subtrees only differ
-in depth by no more than 1.
+For this problem, you need to compare the two trees by searching
+through them. So, I'm going to implement a dfs function.
 
-What does this mean? It means I need to first find a way to find
-the depth of both of the subtrees given a root node. I already 
-know how to do this recursively by just calling dfs on a root
-node's children and traversing through both paths with the base
-case being once I reach a node at the bottom that has non-existent
-child nodes. I just return one added to the recursive call to track
-how many nodes I visit.
+I need to search through both trees simultaneously, starting from
+their roots. At each step during the search, I will check to see 
+if the node I'm currently looking at is equal to the corresponding
+node in the other tree.
 
-Here's the twist with this problem: I need to find a way to verify
-if the differences in depths of the two subtrees is no more than 1
-to see if the tree is height balanced. So, I need an extra flag to 
-check this. How about, if this condition is satisfied, I'll return
-the actual height of the subtree, but then return -1 if it's not balanced.
+The base case will just be when both the nodes you're looking at
+are nonexistent, since if the trees are in fact identical you'll 
+always hit this condition at some point. At this point, you can just
+return true.
 
-Then, at the end, I can just return true or false based on if the final
-return value from the dfs is a valid height or -1, respectively.
+Cases:
+1. If one node is null and the other is not, return false
+2. If both nodes exist but differ in value, return false
+3. If the values of both nodes match then we continue running
+the recursion down through their subtrees.
+4. If any of the recursive calls return false then the output is
+just false automatically.
 
-How do I actually implement this?
-1. I define a dfs function
-2. I define my base case (if not node: return 0)
-3. I run the dfs on the left and right nodes to 
-find the depths of those subtrees
-4. I write a check to see if I found any imbalances along
-the way down the tree. If so, I have to make sure I'm returning
--1 all the time since I already know the tree is imbalanced.
-5. I write a check to see if the absolute value of the difference
-between the depths of the two subtrees is greater than 1. If it is,
-it's not balanced so I return -1.
-6. Otherwise, I return the actual height of the subtree.
-7. At the end, outside the dfs function, I call the dfs function on 
-the root node and check if it's value is -1 or not. If it is, I return
-false. If not, I return true.
+How to implement:
+- Define base case: both nodes are null, return true.
+- Check if one is null and the other is not, return false.
+- Check if the values at both nodes are not equal, return false.
+- Run the recursive dfs on the child nodes of the tree
+- Return dfs(subtree1) and dfs(subtree2) because both need to be
+tree for the entire tree to be identical.
 ```
 
