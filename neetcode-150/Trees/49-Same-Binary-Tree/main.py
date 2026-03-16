@@ -6,21 +6,14 @@
 #         self.right = right
 
 class Solution:
-    def isBalanced(self, root: Optional[TreeNode]) -> bool:
-
-        def dfs(node):
-            if not node:
-                return 0
-            
-            left = dfs(node.left)
-            right = dfs(node.right)
-
-            if left == -1 or right == -1:
-                return -1
-            
-            if abs(left - right) > 1:
-                return -1
-            
-            return 1 + max(left, right)
+    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+        if not p and not q:
+            return True
         
-        return dfs(root) != -1
+        if not p or not q:
+            return False
+        
+        if p.val != q.val:
+            return False
+        
+        return self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)
