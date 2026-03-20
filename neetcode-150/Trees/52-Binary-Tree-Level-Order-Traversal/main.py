@@ -6,13 +6,26 @@
 #         self.right = right
 
 class Solution:
-    def lowestCommonAncestor(self, root: TreeNode, p: TreeNode, q: TreeNode) -> TreeNode:
-        curr = root
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        if not root:
+            return []
+        
+        res = []
+        q = collections.deque([root])
 
-        while curr:
-            if p.val > curr.val and q.val > curr.val:
-                curr = curr.right
-            elif p.val < curr.val and q.val < curr.val:
-                curr = curr.left
-            else: 
-                return curr
+        while q:
+            level_len = len(q)
+            level = []
+
+            for i in range(level_len):
+                node = q.popleft()
+                level.append(node.val)
+
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+            
+            res.append(level)
+        
+        return res
