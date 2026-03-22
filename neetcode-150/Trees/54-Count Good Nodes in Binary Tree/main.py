@@ -6,26 +6,20 @@
 #         self.right = right
 
 class Solution:
-    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
-        if not root:
-            return []
-        
-        res = []
-        q = collections.deque([root])
-
-        while q:
-            level_len = len(q)
-            level = []
-
-            for i in range(level_len):
-                node = q.popleft()
-                level.append(node.val)
-
-                if node.left:
-                    q.append(node.left)
-                if node.right:
-                    q.append(node.right)
+    def goodNodes(self, root: TreeNode) -> int:
+        def dfs(node, max_seen):
+            if not node:
+                return 0
             
-            res.append(level)
+            if node.val >= max_seen:
+                goods = 1
+            else:
+                goods = 0
+            
+            curr_max = max(max_seen, node.val)
+            left_goods = dfs(node.left, curr_max)
+            right_goods = dfs(node.right, curr_max)
+
+            return goods + left_goods + right_goods
         
-        return res
+        return dfs(root, root.val)
