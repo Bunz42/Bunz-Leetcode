@@ -1,68 +1,80 @@
-# 52 - Binary Tree Level Order Traversal
+# 54 - Count Good Nodes in Binary Tree
 
-**Difficulty:** Medium | **Link:** https://neetcode.io/problems/level-order-traversal-of-binary-tree/question
+**Difficulty:** Medium | **Link:** https://neetcode.io/problems/count-good-nodes-in-binary-tree/question
 
 ## 1. Problem Description
 ```text
-Given a binary tree root, return the level order traversal of it as a nested list, where each sublist contains the values of
-nodes at a particular level in the tree, from left to right.
+Within a binary tree, a node x is considered good if the path from the root of the tree to the node x contains
+no nodes with a value greater than the value of node x
+
+Given the root of a binary tree root, return the number of good nodes within the tree.
 ```
 
 **Example 1:**
 
-<img width="349" height="255" alt="image" src="https://github.com/user-attachments/assets/903a9144-d298-40aa-8d79-15fa7020ad09" />
+<img width="625" height="345" alt="image" src="https://github.com/user-attachments/assets/2d589597-f9b7-454b-84f2-ea8fbfa8ac8a" />
 
 ```text
-Input: root = [1,2,3,4,5,6,7]
+Input: root = [2,1,1,3,null,1,5]
 
-Output: [[1],[2,3],[4,5,6,7]]
+Output: 3
 ```
 
 **Example 2:**
+
+<img width="274" height="344" alt="image" src="https://github.com/user-attachments/assets/1d422bc3-becb-4cc5-a2ef-c6fb5b7c20aa" />
+
 ```text
-Input: root = [1]
+Input: root = [1,2,-1,3,4]
 
-Output: [[1]]
-```
-
-**Example 3:**
-```text
-Input: root = []
-
-Output: []
+Output: 4
 ```
 
 **Constraints:**
 ```text
-0 <= The number of nodes in the tree <= 1000.
--1000 <= Node.val <= 1000
+1 <= number of nodes in the tree <= 100
+-100 <= Node.val <= 100
 ```
 
 ## 2. My Approach
 ```text
-For this problem, instead of going down one route at a time all the way to the bottom then
-backtracking up like in dfs, I'm asked to traverse the tree by level. I need to read the tree
-layer by layer, so the proper algorithm for this is actually Breadth-First Search (BFS).
+You can brute force this problem by simply looking at every node in the tree and 
+checking if the path from the root to that node is valid. However, this would result
+in an O(n^2) time complexity because you need to iterate through each node once and
+also iterate from the root to that given node during each iteration.
 
-BFS relies on a queue data structure, and in the case of this problem, it seems appropriate to
-store the nodes in the queue. Store the root first, then pop it and append it to an array for
-its respective level, then do the same for both its children, and so on. Every time a node is
-popped from the queue, I'll add both its children to the queue (so they'll "get in line" behind
-the remaining nodes of that level and wait to be processed in the correct order). I'll repeat
-this process, appending nodes appropriately until the queue is empty.
+Instead, a better way to do this would be to use some variation of a depth first search (dfs).
+The reason why I'm thinking of using dfs for this problem is because this problem cares about
+traversing down single paths to validate them rather than traversing the tree level by level.
 
-To implement this:
-1. Check edge case where tree is just empty, return []
-2. Initialize the result array and our queue with the root node in it
-3. Keep running a while loop until the q is empty
-4. Find the length of the current level
-5. Initialize an array to store the current level's nodes
-6. Process enough nodes to fill the length of the level by popping them
-from the front of the queue (for loop).
-7. Append the popped node to the level node array
-8. If the node has a left child, append it to the back of the queue
-9. If the node has a right child, append it to the back of the queue
-10. After processing all the level's nodes, append the array to the result
-11. Return the result at the end of the while loop.
+I'll determine whether or not a node is a good node by tracking the current maximum node seen
+along the path so far. If the node I'm looking at is less than the current maximum node seen,
+then it's not a good node. If a node is greater than or equal to the max seen so far, then it is 
+a good node so we can increase the counter and update the max node variable.
+
+Now, we just have to run this dfs variation on every path so we can find all the good nodes
+along every path.
+
+Implementation:
+1. dfs helper function that takes in a node and a max value seen so far
+2. if not node: return 0
+3. if node.val >= max_seen: goods = 1
+4. else: goods = 0
+5. curr_max = max(max_seen, node.val)
+6. left_goods = dfs(node.left, curr_max)
+7. right_goods = dfs(node.right, curr_max)
+8. return goods + left_goods + right_goods
+9. (outside dfs helper) call dfs(root, root.val)
+
+Brief explanation of implementation:
+1: I need a helper function for the dfs because we need extra data (the max variable) to make
+things work
+2: Base case
+3-4: Logic for identifying good node
+5: Update the current max seen
+6-7: Find the good nodes of the left and right subtrees using the new max
+8: Return total number of good nodes (good node + its children's good nodes)
+9: Call the dfs starting at the root node and passing in the root node's value as the max seen
+(since it's the only node seen so far so it has to be the max)
 ```
 
