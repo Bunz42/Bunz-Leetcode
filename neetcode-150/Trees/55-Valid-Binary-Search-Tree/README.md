@@ -1,4 +1,4 @@
-# 54 - Count Good Nodes in Binary Tree
+# 55 - Valid Binary Search Tree
 
 **Difficulty:** Medium | **Link:** https://neetcode.io/problems/count-good-nodes-in-binary-tree/question
 
