@@ -6,14 +6,22 @@
 #         self.right = right
 
 class Solution:
-    def isValidBST(self, root: Optional[TreeNode]) -> bool:
-        def dfs(node, min_val, max_val):
-            if not node:
-                return True
+    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+        self.count = 0
+        self.res = None
+
+        def dfs(node):
+            if not node or self.res is not None:
+                return
+
+            dfs(node.left)
+
+            self.count += 1
+            if self.count == k:
+                self.res = node.val
+                return
             
-            if not (min_val < node.val < max_val):
-                return False
-            
-            return dfs(node.left, min_val, node.val) and dfs(node.right, node.val, max_val)
+            dfs(node.right)
         
-        return dfs(root, float('-inf'), float('inf'))
+        dfs(root)
+        return self.res
