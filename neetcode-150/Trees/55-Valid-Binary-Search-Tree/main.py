@@ -6,20 +6,14 @@
 #         self.right = right
 
 class Solution:
-    def goodNodes(self, root: TreeNode) -> int:
-        def dfs(node, max_seen):
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        def dfs(node, min_val, max_val):
             if not node:
-                return 0
+                return True
             
-            if node.val >= max_seen:
-                goods = 1
-            else:
-                goods = 0
+            if not (min_val < node.val < max_val):
+                return False
             
-            curr_max = max(max_seen, node.val)
-            left_goods = dfs(node.left, curr_max)
-            right_goods = dfs(node.right, curr_max)
-
-            return goods + left_goods + right_goods
+            return dfs(node.left, min_val, node.val) and dfs(node.right, node.val, max_val)
         
-        return dfs(root, root.val)
+        return dfs(root, float('-inf'), float('inf'))
