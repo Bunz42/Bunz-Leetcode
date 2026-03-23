@@ -1,31 +1,41 @@
-# 52 - Binary Tree Level Order Traversal
+# 53 - Binary Tree Right Side View
 
-**Difficulty:** Medium | **Link:** https://neetcode.io/problems/level-order-traversal-of-binary-tree/question
+**Difficulty:** Medium | **Link:** https://neetcode.io/problems/binary-tree-right-side-view/question
 
 ## 1. Problem Description
 ```text
-Given a binary tree root, return the level order traversal of it as a nested list, where each sublist contains the values of
-nodes at a particular level in the tree, from left to right.
+You are given the root of a binary tree. Return only the values of the nodes that are visible from the right side of the tree,
+ordered from top to bottom.
 ```
 
 **Example 1:**
 
-<img width="349" height="255" alt="image" src="https://github.com/user-attachments/assets/903a9144-d298-40aa-8d79-15fa7020ad09" />
+<img width="690" height="381" alt="image" src="https://github.com/user-attachments/assets/01e538c0-61cf-4d1f-bc02-5ad1048f5d3e" />
 
 ```text
-Input: root = [1,2,3,4,5,6,7]
+Input: root = [1,2,3,null,4,null,5]
 
-Output: [[1],[2,3],[4,5,6,7]]
+Output: [1,3,5]
 ```
 
 **Example 2:**
-```text
-Input: root = [1]
 
-Output: [[1]]
+<img width="920" height="501" alt="image" src="https://github.com/user-attachments/assets/5ae48d07-34e0-4437-b20e-13e08882315e" />
+
+```text
+Input: root = [1,2,3,4,null,null,null,5]
+
+Output: [1,3,4,5]
 ```
 
 **Example 3:**
+```text
+Input: root = [1,null,2]
+
+Output: [1,2]
+```
+
+**Example 4:**
 ```text
 Input: root = []
 
@@ -34,35 +44,40 @@ Output: []
 
 **Constraints:**
 ```text
-0 <= The number of nodes in the tree <= 1000.
--1000 <= Node.val <= 1000
+0 <= number of nodes in the tree <= 100
+-100 <= Node.val <= 100
 ```
 
 ## 2. My Approach
 ```text
-For this problem, instead of going down one route at a time all the way to the bottom then
-backtracking up like in dfs, I'm asked to traverse the tree by level. I need to read the tree
-layer by layer, so the proper algorithm for this is actually Breadth-First Search (BFS).
+How to think of the intuition:
+- Try to think about what it actually means to be "visible from the right side"
+- If you think about it, the last node counting from left to right on a given level
+in the tree is the one "visible from the right" because it "blocks vision" of all the
+nodes to its left.
+- For example, if I had 5 nodes on a given level in the tree, and I counted 1, 2, 3, 4
+5 from the left, the last node (5th) would be the one blocking nodes 1-4, so it'd be
+the only one visible from the right side.
+- The problem wants you to find every node that is only visible from the right, so you
+just look at every level and find the rightmost/last node.
+- Now that you know the problem has to do with a level-traversal, you can immediately
+think of using BFS, since it's ideal for level-traversal in a tree.
 
-BFS relies on a queue data structure, and in the case of this problem, it seems appropriate to
-store the nodes in the queue. Store the root first, then pop it and append it to an array for
-its respective level, then do the same for both its children, and so on. Every time a node is
-popped from the queue, I'll add both its children to the queue (so they'll "get in line" behind
-the remaining nodes of that level and wait to be processed in the correct order). I'll repeat
-this process, appending nodes appropriately until the queue is empty.
+High-Level Solution:
+1. We want to traverse through the tree level by level, performing a Breadth-First-Search (BFS)
+2. At each level of the tree, we find the rightmost node and add it to our array
 
-To implement this:
-1. Check edge case where tree is just empty, return []
-2. Initialize the result array and our queue with the root node in it
-3. Keep running a while loop until the q is empty
-4. Find the length of the current level
-5. Initialize an array to store the current level's nodes
-6. Process enough nodes to fill the length of the level by popping them
-from the front of the queue (for loop).
-7. Append the popped node to the level node array
-8. If the node has a left child, append it to the back of the queue
-9. If the node has a right child, append it to the back of the queue
-10. After processing all the level's nodes, append the array to the result
-11. Return the result at the end of the while loop.
+Implementation:
+1. Check to handle edge case where tree is empty
+2. Define result array and initialize a queue for the bfs to track each level's nodes (initialize
+it with just the root node in it for the very top level)
+3. While loop to loop until the queue is empty (since once the queue is completely
+empty it means you've traversed through all the levels because that means there were
+no left and right nodes to append from the previous iteration)
+4. Calculate the length of the current level (the length of the queue)
+5. Pop every node in the level from the front of the queue with a loop (if the node you just popped
+was the last node in the level [level_length - 1], then you add it to the result array)
+6. Add the left and right children of each node you pop to the queue to represent the next level
+7. After exiting the while loop, return the resulting array
 ```
 
